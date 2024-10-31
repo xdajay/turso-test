@@ -62,7 +62,7 @@ export default async function Home() {
   const initialMetrics = await refreshMessage()
   
   return (
-    <main className="flex w-full min-h-screen flex-col max-w-2xl mx-auto text-center p-20 dark:text-neutral-300 font-mono space-y-12">
+    <main className="flex w-full min-h-screen flex-col max-w-2xl mx-auto text-center p-6 md:p-20 dark:text-neutral-300 font-mono space-y-12">
 
        <div>
         <h1 className="text-4xl font-bold mb-3">
