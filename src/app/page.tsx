@@ -71,7 +71,6 @@ export default async function Home() {
         <p>Next 15 + Server Actions + force-dynamic</p>
         </div>
 
-        
         <MetricsDisplay 
           initialMetrics={initialMetrics} 
           refreshAction={refreshMessage} 
