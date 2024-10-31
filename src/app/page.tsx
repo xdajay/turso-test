@@ -2,8 +2,21 @@ export const dynamic = 'force-dynamic'
 export const runtime = "edge"
 
 import { db } from '@/lib/db'
+import { MetricsDisplay } from '@/components/MetricsDisplay'
 
-async function getMessage() {
+// Define types for our metrics
+type Metrics = {
+  message: string;
+  tursoLatency: number;
+  nextLatency: number;
+  totalLatency: number;
+}
+
+// Server Action
+async function refreshMessage(): Promise<Metrics> {
+  'use server'
+  const pageStart = performance.now()
+  
   const tursoStart = performance.now()
   const result = await db.execute(`
     SELECT 
@@ -13,17 +26,20 @@ async function getMessage() {
     LIMIT 1
   `)
   const tursoLatency = performance.now() - tursoStart
+  
+  const totalLatency = performance.now() - pageStart
+  const nextLatency = totalLatency - tursoLatency
+  
   return {
-    content: result.rows[0]?.content as string,
-    tursoLatency
+    message: result.rows[0]?.content as string,
+    tursoLatency,
+    nextLatency,
+    totalLatency
   }
 }
 
 export default async function Home() {
-  const pageStart = performance.now()
-  const { content: message, tursoLatency } = await getMessage()
-  const totalLatency = performance.now() - pageStart
-  const nextLatency = totalLatency - tursoLatency
+  const initialMetrics = await refreshMessage()
   
   return (
     <main className="flex min-h-screen flex-col items-center justify-center p-24">
@@ -31,25 +47,22 @@ export default async function Home() {
         <h1 className="text-4xl font-bold text-center mb-8">
           Message from Turso
         </h1>
-        <p className="text-2xl text-center">
-          {message}
-        </p>
-        <div className="mt-8 space-y-2 text-center text-sm text-gray-600">
-          <p>🚀 Turso DB Latency: {tursoLatency.toFixed(2)}ms</p>
-          <p>⚡  Next.js Latency: {nextLatency.toFixed(2)}ms</p>
-          <p>🌐 Total Latency: {totalLatency.toFixed(2)}ms</p>
-        </div>
+        
+        <MetricsDisplay 
+          initialMetrics={initialMetrics} 
+          refreshAction={refreshMessage} 
+        />
 
-        <div className=" p-4 rounded">
-             <h3 className="font-medium mb-2">📝 SQL Query Running:</h3>
-             <pre className=" p-3 rounded text-sm overflow-x-auto">
-               {`SELECT 
- content || ' [Random: ' || substr(hex(randomblob(4)), 1, 8) || 
- ' Time: ' || datetime('now') || ']' as content 
+        <div className="p-4 rounded">
+          <h3 className="font-medium mb-2">📝 SQL Query Running:</h3>
+          <pre className="p-3 rounded text-sm overflow-x-auto">
+            {`SELECT 
+  content || ' [Random: ' || substr(hex(randomblob(4)), 1, 8) || 
+  ' Time: ' || datetime('now') || ']' as content 
 FROM messages 
 LIMIT 1`}
-             </pre>
-           </div>
+          </pre>
+        </div>
       </div>
     </main>
   )
