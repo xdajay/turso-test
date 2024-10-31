@@ -66,7 +66,7 @@ export default async function Home() {
 
        <div>
         <h1 className="text-4xl font-bold mb-3">
-          Message from Next Turso
+          Message from Turso Next
         </h1>
         <p>Next 15 + Server Actions + force-dynamic</p>
         </div>

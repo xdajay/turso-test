@@ -1,4 +1,5 @@
 'use client'
+import { useState, useTransition } from 'react'
 
 type Metrics = {
     message: string;
@@ -10,33 +11,29 @@ type Metrics = {
     preQueryTime: number;
     postQueryTime: number;
   }
-
-
-import { useState, useTransition } from 'react'
-
-export function MetricsDisplay({ 
-  initialMetrics, 
-  refreshAction 
-}: { 
-  initialMetrics: Metrics,
-  refreshAction: () => Promise<Metrics>
-}) {
-  const [metrics, setMetrics] = useState(initialMetrics)
-  const [isPending, startTransition] = useTransition()
-
-  const handleRefresh = async () => {
-    const clientStart = Date.now()
-    
-    startTransition(async () => {
-      const newMetrics = await refreshAction()
-      const clientEnd = Date.now()
-      
-      setMetrics({
-        ...newMetrics,
-        totalLatency: clientEnd - newMetrics.serverStart // Total round trip time
+  
+  export function MetricsDisplay({ 
+    initialMetrics, 
+    refreshAction 
+  }: { 
+    initialMetrics: Metrics,
+    refreshAction: () => Promise<Metrics>
+  }) {
+    const [metrics, setMetrics] = useState(initialMetrics)
+    const [isPending, startTransition] = useTransition()
+  
+    const handleRefresh = async () => {
+      startTransition(async () => {
+        const newMetrics = await refreshAction()
+        const clientEnd = Date.now()
+        
+        // Update metrics with actual round-trip time
+        setMetrics({
+          ...newMetrics,
+          totalLatency: clientEnd - newMetrics.serverStart
+        })
       })
-    })
-  }
+    }
 
   return (
     <div className='mt-4'>
