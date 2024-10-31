@@ -1,4 +1,7 @@
-// src/app/page.tsx
+export const dynamic = 'force-dynamic'
+export const runtime = "edge"
+export const preferredRegion = "all"
+
 import { db } from '@/lib/db'
 
 async function getMessage() {
